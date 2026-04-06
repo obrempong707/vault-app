@@ -36,6 +36,20 @@
         ],
         "post-create-project-cmd": [
           "@php artisan key:generate --ansi"
+        ],
+        "prod-optimize": [
+          "@php artisan config:cache",
+          "@php artisan route:cache",
+          "@php artisan view:cache",
+          "@php artisan event:cache",
+          "@php artisan optimize"
+        ],
+        "prod-clear": [
+          "@php artisan optimize:clear",
+          "@php artisan event:clear",
+          "@php artisan view:clear",
+          "@php artisan route:clear",
+          "@php artisan config:clear"
         ]
     },
     "config": {
