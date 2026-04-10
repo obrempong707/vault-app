@@ -107,6 +107,85 @@ The script will:
 - Verify all services are running
 - Display deployment summary
 
+## Automatic Updates After GitHub Pushes
+
+If you want the website to update automatically whenever GitHub changes, use the new
+`auto-update-from-github.sh` script on the VPS.
+
+### What it does
+- Pulls the latest code from the configured Git branch
+- Reinstalls backend dependencies when needed
+- Runs Laravel migrations and cache clears
+- Rebuilds the frontend
+- Syncs the frontend build into the web root
+- Restarts Nginx and PHP-FPM
+
+### Recommended setup
+
+1. Copy the script to your VPS and make it executable:
+
+```bash
+chmod +x /var/www/vaultlogix/auto-update-from-github.sh
+```
+
+2. Make sure the repository on the VPS already exists and is connected to `origin`.
+
+3. Trigger the script from one of these options:
+
+- **GitHub Webhook**
+  - Create a webhook in your GitHub repository.
+  - Point it to a small server endpoint on your VPS that runs the script.
+  - Trigger on `push` events.
+
+- **Cron job**
+  - Run the script every few minutes to check for updates.
+  - Example:
+
+```bash
+*/5 * * * * /var/www/vaultlogix/auto-update-from-github.sh >> /var/log/vaultlogix-cron.log 2>&1
+```
+
+### Environment variables
+
+You can override the defaults when running the script:
+
+```bash
+APP_PATH=/var/www/vaultlogix BRANCH=main /var/www/vaultlogix/auto-update-from-github.sh
+```
+
+### Notes
+
+- The script assumes the main code lives in `/var/www/vaultlogix`.
+- It expects the frontend build output to be served from `/var/www/vaultlogix-web`.
+- If your branch name is different, set `BRANCH` before running.
+
+### GitHub webhook endpoint
+
+When the backend is running, GitHub can call this endpoint after each push:
+
+```text
+POST http://YOUR_SERVER_IP/api/webhooks/github
+```
+
+#### Required environment variables
+
+Set these on the server where the Laravel backend runs:
+
+```bash
+GITHUB_WEBHOOK_SECRET=your-long-random-secret
+GITHUB_WEBHOOK_BRANCH=main
+GITHUB_UPDATE_SCRIPT=/var/www/vaultlogix/auto-update-from-github.sh
+```
+
+#### GitHub webhook settings
+
+- **Payload URL**: `http://YOUR_SERVER_IP/api/webhooks/github`
+- **Content type**: `application/json`
+- **Secret**: match `GITHUB_WEBHOOK_SECRET`
+- **Events**: only `push`
+
+The webhook only runs the update script when the push is for the configured branch.
+
 ## After Deployment
 
 ### 1. Update DNS Records

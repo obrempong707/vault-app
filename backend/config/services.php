@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'github' => [
+        'webhook_secret' => env('GITHUB_WEBHOOK_SECRET'),
+        'branch' => env('GITHUB_WEBHOOK_BRANCH', 'main'),
+        'update_script' => env('GITHUB_UPDATE_SCRIPT', base_path('../auto-update-from-github.sh')),
+    ],
 ];

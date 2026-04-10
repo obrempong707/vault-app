@@ -27,6 +27,11 @@ const defaultUsers = [
   },
 ];
 
+const getDemoCredential = (key, fallback) => {
+  const value = import.meta.env[key];
+  return typeof value === 'string' && value.trim() ? value : fallback;
+};
+
 const defaultAuthState = {
   isAuthenticated: false,
   token: null,
@@ -127,11 +132,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginAsUser = () => {
-    return login('client@vaultlogix.com', 'VaultLogixClient!2026');
+    return login(
+      getDemoCredential('VITE_VAULTLOGIX_CLIENT_EMAIL', 'client@vaultlogix.com'),
+      getDemoCredential('VITE_VAULTLOGIX_CLIENT_PASSWORD', ''),
+    );
   };
 
   const loginAsAdmin = () => {
-    return login('admin@vaultlogix.com', 'VaultLogixAdmin!2026');
+    return login(
+      getDemoCredential('VITE_VAULTLOGIX_ADMIN_EMAIL', 'admin@vaultlogix.com'),
+      getDemoCredential('VITE_VAULTLOGIX_ADMIN_PASSWORD', ''),
+    );
   };
 
   const addUser = (userData) => {

@@ -225,6 +225,8 @@ npm run build
 cp -r dist /var/www/vaultlogix/frontend-dist
 ```
 
+> The deployment scripts now check Node.js automatically and install Node 22 if the VPS version is too old for Vite.
+
 Create `/etc/nginx/sites-available/vaultlogix-web`:
 
 ```nginx
@@ -259,7 +261,7 @@ systemctl restart nginx
 1. Push frontend to GitHub
 2. Connect to Netlify/Vercel
 3. Set build command: `npm run build`
-4. Set publish directory: `dist`
+4. Set publish directory: `frontend-dist`
 5. Set environment variable: `VITE_API_URL=http://YOUR_VPS_IP/api`
 
 ## Step 8: Setup Supervisor (for Laravel Queue)

@@ -12,27 +12,36 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@vaultlogix.com'],
-            [
-                'name' => 'Admin Sterling',
-                'password' => Hash::make('VaultLogixAdmin!2026'),
-                'role' => 'admin',
-                'customer_id' => null,
-                'status' => 'active',
-            ]
-        );
+        $adminEmail = env('VAULTLOGIX_ADMIN_EMAIL');
+        $adminPassword = env('VAULTLOGIX_ADMIN_PASSWORD');
+        $clientEmail = env('VAULTLOGIX_CLIENT_EMAIL');
+        $clientPassword = env('VAULTLOGIX_CLIENT_PASSWORD');
 
-        User::updateOrCreate(
-            ['email' => 'client@vaultlogix.com'],
-            [
-                'name' => 'Client Lawson',
-                'password' => Hash::make('VaultLogixClient!2026'),
-                'role' => 'client',
-                'customer_id' => 'CUST-001',
-                'status' => 'active',
-            ]
-        );
+        if ($adminEmail && $adminPassword) {
+            User::updateOrCreate(
+                ['email' => $adminEmail],
+                [
+                    'name' => env('VAULTLOGIX_ADMIN_NAME', 'Admin Sterling'),
+                    'password' => Hash::make($adminPassword),
+                    'role' => 'admin',
+                    'customer_id' => null,
+                    'status' => 'active',
+                ]
+            );
+        }
+
+        if ($clientEmail && $clientPassword) {
+            User::updateOrCreate(
+                ['email' => $clientEmail],
+                [
+                    'name' => env('VAULTLOGIX_CLIENT_NAME', 'Client Lawson'),
+                    'password' => Hash::make($clientPassword),
+                    'role' => 'client',
+                    'customer_id' => env('VAULTLOGIX_CLIENT_CUSTOMER_ID', 'CUST-001'),
+                    'status' => 'active',
+                ]
+            );
+        }
 
         // Seed Shipments (use updateOrCreate to prevent duplicates)
         $shipment1 = Shipment::updateOrCreate(

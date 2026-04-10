@@ -73,7 +73,22 @@ log_info "Step 1: Cloning repository..."
 mkdir -p $APP_PATH
 git config --global --add safe.directory $APP_PATH 2>/dev/null || true
 cd $APP_PATH
-git clone $GITHUB_REPO . 2>/dev/null || git pull
+
+if [ ! -d .git ]; then
+    git clone "$GITHUB_REPO" .
+else
+    log_warn "Existing repository found. Stashing local changes before update..."
+    git stash push --include-untracked -m "auto-deploy backup $(date '+%Y-%m-%d %H:%M:%S')" 2>/dev/null || true
+
+    git fetch origin
+    if git show-ref --verify --quiet "refs/remotes/origin/master"; then
+        git reset --hard origin/master
+    elif git show-ref --verify --quiet "refs/remotes/origin/main"; then
+        git reset --hard origin/main
+    else
+        git pull --rebase
+    fi
+fi
 
 # ============================================
 # STEP 2: Setup Backend
@@ -104,6 +119,38 @@ composer install --no-dev --optimize-autoloader 2>/dev/null || log_warn "Compose
 
 # Generate app key
 php artisan key:generate 2>/dev/null || log_warn "Key generation had issues"
+
+# Ensure Node.js is new enough for Vite before building the frontend
+ensure_nodejs() {
+    if command -v node >/dev/null 2>&1; then
+        NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]")"
+        NODE_MINOR="$(node -p "process.versions.node.split('.')[1]")"
+        if [ "$NODE_MAJOR" -gt 20 ] || { [ "$NODE_MAJOR" -eq 20 ] && [ "$NODE_MINOR" -ge 19 ]; } || [ "$NODE_MAJOR" -ge 22 ]; then
+            log_info "Node.js $(node -v) is compatible with Vite"
+            return 0
+        fi
+        log_warn "Node.js $(node -v) is too old. Installing Node 22..."
+    else
+        log_warn "Node.js is not installed. Installing Node 22..."
+    fi
+
+    if command -v apt-get >/dev/null 2>&1; then
+        curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+        apt-get install -y nodejs
+    else
+        log_error "No supported package manager found to install Node.js automatically."
+        exit 1
+    fi
+
+    if command -v node >/dev/null 2>&1; then
+        log_info "Node.js upgraded to $(node -v)"
+    else
+        log_error "Node.js installation failed."
+        exit 1
+    fi
+}
+
+ensure_nodejs
 
 # Run migrations
 log_info "Running database migrations..."
@@ -138,9 +185,9 @@ FRONTEND_ENV
 npm run build 2>/dev/null || log_warn "Frontend build had warnings"
 
 # Copy to web root
-mkdir -p /var/www/vaultlogix-web
-cp -r dist/* /var/www/vaultlogix-web/ 2>/dev/null || true
-chown -R www-data:www-data /var/www/vaultlogix-web 2>/dev/null || true
+mkdir -p /var/www/vaultlogix/frontend-dist
+cp -r dist/* /var/www/vaultlogix/frontend-dist/ 2>/dev/null || true
+chown -R www-data:www-data /var/www/vaultlogix/frontend-dist 2>/dev/null || true
 
 # ============================================
 # STEP 4: Configure Nginx
@@ -149,6 +196,11 @@ log_info "Step 4: Configuring Nginx..."
 
 # Remove default site
 rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
+rm -f /etc/nginx/sites-enabled/vaultlogix-api 2>/dev/null || true
+rm -f /etc/nginx/sites-enabled/vaultlogix-web 2>/dev/null || true
+
+# Remove any older VaultLogix site files that may conflict
+find /etc/nginx/sites-enabled -maxdepth 1 -type l \( -name '*vaultlogix*' -o -name '*VaultLogix*' \) -delete 2>/dev/null || true
 
 # Create API server block
 cat > /etc/nginx/sites-available/vaultlogix-api <<'NGINX_API'
@@ -156,16 +208,9 @@ server {
     listen 80;
     listen [::]:80;
     server_name 69.164.195.230;
-    return 301 https://$server_name$request_uri;
-}
 
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name 69.164.195.230;
-
-    root /var/www/vaultlogix/backend/public;
-    index index.php;
+    root /var/www/vaultlogix/frontend-dist;
+    index index.html;
 
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -176,11 +221,17 @@ server {
     gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss;
 
     location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ^~ /api/ {
+        root /var/www/vaultlogix/backend/public;
         try_files $uri $uri/ /index.php?$query_string;
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        root /var/www/vaultlogix/backend/public;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
@@ -197,17 +248,13 @@ cat > /etc/nginx/sites-available/vaultlogix-web <<'NGINX_WEB'
 server {
     listen 80;
     listen [::]:80;
-    server_name 69.164.195.230;
+    server_name _;
 
-    root /var/www/vaultlogix-web;
+    root /var/www/vaultlogix/frontend-dist;
     index index.html;
 
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
 
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
@@ -221,10 +268,18 @@ ln -sf /etc/nginx/sites-available/vaultlogix-api /etc/nginx/sites-enabled/ 2>/de
 ln -sf /etc/nginx/sites-available/vaultlogix-web /etc/nginx/sites-enabled/ 2>/dev/null || true
 
 # Test Nginx config
-nginx -t 2>/dev/null || log_warn "Nginx config test had warnings"
+if nginx -t; then
+    log_info "✓ Nginx config test passed"
+else
+    log_error "✗ Nginx config test failed"
+fi
 
 # Restart Nginx
-systemctl restart nginx 2>/dev/null || log_warn "Nginx restart had issues"
+if systemctl restart nginx; then
+    log_info "✓ Nginx restarted successfully"
+else
+    log_error "✗ Nginx restart failed"
+fi
 
 # ============================================
 # STEP 5: Verify Deployment
@@ -239,10 +294,10 @@ else
 fi
 
 # Check PHP-FPM
-if systemctl is-active --quiet php8.3-fpm 2>/dev/null; then
-    log_info "✓ PHP-FPM is running"
-elif systemctl is-active --quiet php8.1-fpm 2>/dev/null; then
+if systemctl is-active --quiet php8.1-fpm 2>/dev/null; then
     log_info "✓ PHP-FPM (8.1) is running"
+elif systemctl is-active --quiet php8.3-fpm 2>/dev/null; then
+    log_info "✓ PHP-FPM (8.3) is running"
 else
     log_warn "⚠ PHP-FPM status unknown"
 fi
@@ -276,8 +331,8 @@ log_info "  ssh root@$VPS_IP"
 log_info ""
 log_info "Useful Commands:"
 log_info "  View logs: tail -f $APP_PATH/backend/storage/logs/laravel.log"
-log_info "  Restart services: systemctl restart nginx php8.3-fpm mysql"
-log_info "  Check status: systemctl status nginx php8.3-fpm mysql"
+log_info "  Restart services: systemctl restart nginx php8.1-fpm mysql"
+log_info "  Check status: systemctl status nginx php8.1-fpm mysql"
 log_info ""
 
 VPSSCRIPT

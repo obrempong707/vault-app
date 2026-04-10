@@ -83,24 +83,6 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-slate-600" />
-                <p className="font-semibold text-slate-900">Customer demo</p>
-              </div>
-              <p className="text-sm text-slate-600">client@vaultlogix.com</p>
-              <p className="text-sm text-slate-600">VaultLogixClient!2026</p>
-            </div>
-            <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-4 h-4 text-blue-700" />
-                <p className="font-semibold text-slate-900">Admin demo</p>
-              </div>
-              <p className="text-sm text-slate-600">admin@vaultlogix.com</p>
-              <p className="text-sm text-slate-600">VaultLogixAdmin!2026</p>
-            </div>
-          </div>
         </Card>
       </div>
     </div>
