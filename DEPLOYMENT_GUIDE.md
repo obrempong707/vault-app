@@ -4,7 +4,7 @@
 
 - Linode VPS with Ubuntu 22.04 LTS or Debian 12
 - SSH access to your VPS
-- Domain name (optional, can use IP initially)
+- Domain name (optional; you can deploy with the IP first)
 - Git installed on VPS
 
 ## Step 1: Initial VPS Setup
@@ -127,18 +127,18 @@ nano .env
 ```
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://api.yourdomain.com
+APP_URL=http://YOUR_VPS_IP
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=vaultlogix
-DB_USERNAME=vaultlogix
-DB_PASSWORD=your_secure_password
+DB_USERNAME=admin
+DB_PASSWORD=%007clT#
 
-CACHE_DRIVER=redis
-QUEUE_CONNECTION=redis
-SESSION_DRIVER=cookie
+CACHE_DRIVER=file
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
 ```
 
 ### 5.4 Install dependencies and setup
@@ -169,34 +169,14 @@ Create `/etc/nginx/sites-available/vaultlogix-api`:
 server {
     listen 80;
     listen [::]:80;
-    server_name api.yourdomain.com;
+    server_name YOUR_VPS_IP;
 
     root /var/www/vaultlogix/backend/public;
     index index.php;
 
-    # Redirect HTTP to HTTPS
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name api.yourdomain.com;
-
-    root /var/www/vaultlogix/backend/public;
-    index index.php;
-
-    # SSL certificates (use Let's Encrypt)
-    ssl_certificate /etc/letsencrypt/live/api.yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.yourdomain.com/privkey.pem;
-
-    # Security headers
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
 
-    # Gzip compression
     gzip on;
     gzip_vary on;
     gzip_min_length 1000;
@@ -231,19 +211,7 @@ nginx -t
 systemctl restart nginx
 ```
 
-## Step 7: Setup SSL Certificate (Let's Encrypt)
-
-```bash
-apt install -y certbot python3-certbot-nginx
-
-certbot certonly --nginx -d api.yourdomain.com
-
-# Auto-renew certificates
-systemctl enable certbot.timer
-systemctl start certbot.timer
-```
-
-## Step 8: Setup Frontend (Static Hosting)
+## Step 7: Setup Frontend (Static Hosting)
 
 ### Option A: Serve from same Nginx server
 ```bash
@@ -263,23 +231,10 @@ Create `/etc/nginx/sites-available/vaultlogix-web`:
 server {
     listen 80;
     listen [::]:80;
-    server_name yourdomain.com www.yourdomain.com;
-
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name yourdomain.com www.yourdomain.com;
+    server_name YOUR_VPS_IP;
 
     root /var/www/vaultlogix/frontend-dist;
     index index.html;
-
-    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
 
@@ -305,9 +260,9 @@ systemctl restart nginx
 2. Connect to Netlify/Vercel
 3. Set build command: `npm run build`
 4. Set publish directory: `dist`
-5. Set environment variable: `VITE_API_URL=https://api.yourdomain.com/api`
+5. Set environment variable: `VITE_API_URL=http://YOUR_VPS_IP/api`
 
-## Step 9: Setup Supervisor (for Laravel Queue)
+## Step 8: Setup Supervisor (for Laravel Queue)
 
 ```bash
 apt install -y supervisor
@@ -329,7 +284,7 @@ EOF
 systemctl restart supervisor
 ```
 
-## Step 10: Setup Cron Jobs
+## Step 9: Setup Cron Jobs
 
 ```bash
 # Edit crontab
@@ -341,17 +296,17 @@ Add:
 * * * * * cd /var/www/vaultlogix/backend && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-## Step 11: Verify Deployment
+## Step 10: Verify Deployment
 
 ### Check backend API
 ```bash
-curl https://api.yourdomain.com/api/login -X POST \
+curl http://YOUR_VPS_IP/api/login -X POST \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
 ```
 
 ### Check frontend
-Open `https://yourdomain.com` in browser
+Open `http://YOUR_VPS_IP` in browser
 
 ### Monitor logs
 ```bash
@@ -366,7 +321,7 @@ tail -f /var/log/nginx/access.log
 tail -f /var/log/php8.1-fpm.log
 ```
 
-## Step 12: Setup Monitoring & Backups
+## Step 11: Setup Monitoring & Backups
 
 ### Install monitoring tools
 ```bash
@@ -409,7 +364,7 @@ echo "0 2 * * * /usr/local/bin/backup-vaultlogix.sh" | crontab -
 - [ ] Nginx installed and configured
 - [ ] Backend cloned and setup
 - [ ] Frontend built and deployed
-- [ ] SSL certificates installed
+- [ ] SSL certificates installed later after domain is added
 - [ ] Environment variables configured
 - [ ] Database migrations run
 - [ ] Production optimization commands executed
@@ -468,7 +423,7 @@ ls -la /run/php/php8.1-fpm.sock
 - Monitor disk space: `df -h`
 - Monitor memory: `free -h`
 - Update packages monthly: `apt update && apt upgrade`
-- Renew SSL certificates: `certbot renew`
+- Renew SSL certificates: `certbot renew` (after domain is configured)
 
 ---
 

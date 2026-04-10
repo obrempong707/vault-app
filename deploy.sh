@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # VaultLogix Deployment Script for Linode VPS
-# Usage: ./deploy.sh <VPS_IP> <SSH_USER> <DOMAIN> <DB_PASSWORD>
+# Usage: ./deploy.sh <VPS_IP> <SSH_USER> <DOMAIN> [DB_USERNAME] [DB_PASSWORD]
 
 set -e
 
@@ -13,20 +13,22 @@ NC='\033[0m' # No Color
 
 # Check arguments
 if [ $# -lt 3 ]; then
-    echo -e "${RED}Usage: ./deploy.sh <VPS_IP> <SSH_USER> <DOMAIN> [DB_PASSWORD]${NC}"
-    echo "Example: ./deploy.sh 192.0.2.1 root yourdomain.com secure_password_123"
+    echo -e "${RED}Usage: ./deploy.sh <VPS_IP> <SSH_USER> <DOMAIN> [DB_USERNAME] [DB_PASSWORD]${NC}"
+    echo "Example: ./deploy.sh 192.0.2.1 root 192.0.2.1 admin %007clT#"
     exit 1
 fi
 
 VPS_IP=$1
 SSH_USER=$2
 DOMAIN=$3
-DB_PASSWORD=${4:-"vaultlogix_secure_$(openssl rand -base64 12)"}
+DB_USERNAME=${4:-"admin"}
+DB_PASSWORD=${5:-"%007clT#"}
 
 echo -e "${YELLOW}=== VaultLogix Deployment Script ===${NC}"
 echo "VPS IP: $VPS_IP"
 echo "SSH User: $SSH_USER"
 echo "Domain: $DOMAIN"
+echo "Database User: $DB_USERNAME"
 echo "Database Password: $DB_PASSWORD"
 echo ""
 
@@ -38,7 +40,8 @@ set -e
 VPS_IP=$1
 SSH_USER=$2
 DOMAIN=$3
-DB_PASSWORD=$4
+DB_USERNAME=$4
+DB_PASSWORD=$5
 
 echo "Starting VPS setup..."
 
@@ -51,7 +54,7 @@ apt install -y curl wget git build-essential software-properties-common apt-tran
 # Install PHP
 add-apt-repository ppa:ondrej/php -y
 apt update
-apt install -y php8.1-fpm php8.1-cli php8.1-mysql php8.1-mbstring php8.1-xml php8.1-curl php8.1-zip php8.1-bcmath php8.1-json php8.1-tokenizer php8.1-opcache
+apt install -y php8.1-fpm php8.1-cli php8.1-mysql php8.1-mbstring php8.1-xml php8.1-curl php8.1-zip php8.1-bcmath php8.1-tokenizer php8.1-opcache
 
 # Install MySQL
 apt install -y mysql-server
@@ -67,8 +70,6 @@ systemctl start nginx
 systemctl enable nginx
 
 # Install Certbot
-apt install -y certbot python3-certbot-nginx
-
 # Install Supervisor
 apt install -y supervisor
 
@@ -104,7 +105,6 @@ echo "   php artisan key:generate"
 echo "   php artisan migrate --force"
 echo "   composer run prod-optimize"
 echo "4. Setup Nginx configuration"
-echo "5. Install SSL certificate: certbot certonly --nginx -d $DOMAIN"
-echo "6. Setup frontend and deploy"
+echo "5. Setup frontend and deploy"
 echo ""
 echo "See DEPLOYMENT_GUIDE.md for detailed instructions"

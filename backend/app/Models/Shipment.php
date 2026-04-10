@@ -31,4 +31,9 @@ class Shipment extends Model
     {
         return $this->hasMany(ShipmentContent::class);
     }
+
+    public function trackingStops()
+    {
+        return $this->hasMany(TrackingStop::class)->orderBy('sequence')->orderBy('recorded_at');
+    }
 }

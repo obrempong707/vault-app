@@ -10,6 +10,7 @@ class VaultAsset extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'customer_id',
         'customer_name',
         'asset_type',
@@ -28,4 +29,9 @@ class VaultAsset extends Model
         'value' => 'decimal:2',
         'deposit_date' => 'date',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
