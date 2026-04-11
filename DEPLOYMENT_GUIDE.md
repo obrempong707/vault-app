@@ -141,6 +141,27 @@ QUEUE_CONNECTION=sync
 SESSION_DRIVER=file
 ```
 
+### 5.3.1 Rotate the admin password
+
+Use this procedure whenever you need to change the admin password in production:
+
+1. Choose a new secure password.
+2. Update the production secret or `.env` value:
+   ```env
+   VAULTLOGIX_ADMIN_EMAIL=admin@vault.com
+   VAULTLOGIX_ADMIN_PASSWORD=your-new-strong-password
+   ```
+3. If you also use the frontend demo login shortcut, update the frontend env values too:
+   ```env
+   VITE_VAULTLOGIX_ADMIN_EMAIL=admin@vault.com
+   VITE_VAULTLOGIX_ADMIN_PASSWORD=your-new-strong-password
+   ```
+4. Redeploy or restart the backend so the updated secret is available.
+5. Re-run the database seeder or your deployment script if it is responsible for creating the admin user.
+6. Log in with the new password and remove the old value from any notes, shell history, or secret stores.
+
+If the old password was exposed publicly, rotate it immediately and invalidate any sessions or tokens that may still be active.
+
 ### 5.4 Install dependencies and setup
 ```bash
 composer install --no-dev --optimize-autoloader
