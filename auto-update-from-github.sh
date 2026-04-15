@@ -6,7 +6,7 @@
 set -euo pipefail
 
 APP_PATH="${APP_PATH:-/var/www/vaultlogix}"
-BRANCH="${BRANCH:-main}"
+BRANCH="${BRANCH:-master}"
 BACKEND_PATH="$APP_PATH/backend"
 FRONTEND_PATH="$APP_PATH/frontend"
 LOCK_FILE="${LOCK_FILE:-/tmp/vaultlogix-update.lock}"
