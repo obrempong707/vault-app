@@ -19,11 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_filter([
+    'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
         env('PRODUCTION_FRONTEND_URL', 'https://www.ultrasecurefrat.com'),
-        env('NETLIFY_FRONTEND_URL'),
-    ]),
+    ],
 
     'allowed_origins_patterns' => [],
 
