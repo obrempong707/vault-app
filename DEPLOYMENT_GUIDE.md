@@ -127,7 +127,7 @@ nano .env
 ```
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=http://YOUR_VPS_IP
+APP_URL=https://www.ultrasecurefrat.com
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -148,12 +148,12 @@ Use this procedure whenever you need to change the admin password in production:
 1. Choose a new secure password.
 2. Update the production secret or `.env` value:
    ```env
-   VAULTLOGIX_ADMIN_EMAIL=admin@vault.com
+   VAULTLOGIX_ADMIN_EMAIL=admin@ultrasecurefrat.com
    VAULTLOGIX_ADMIN_PASSWORD=your-new-strong-password
    ```
 3. If you also use the frontend demo login shortcut, update the frontend env values too:
    ```env
-   VITE_VAULTLOGIX_ADMIN_EMAIL=admin@vault.com
+   VITE_VAULTLOGIX_ADMIN_EMAIL=admin@ultrasecurefrat.com
    VITE_VAULTLOGIX_ADMIN_PASSWORD=your-new-strong-password
    ```
 4. Redeploy or restart the backend so the updated secret is available.
@@ -190,7 +190,11 @@ Create `/etc/nginx/sites-available/vaultlogix-api`:
 server {
     listen 80;
     listen [::]:80;
-    server_name YOUR_VPS_IP;
+    server_name www.ultrasecurefrat.com ultrasecurefrat.com;
+
+    if ($host = ultrasecurefrat.com) {
+        return 301 https://www.ultrasecurefrat.com$request_uri;
+    }
 
     root /var/www/vaultlogix/backend/public;
     index index.php;
@@ -283,7 +287,7 @@ systemctl restart nginx
 2. Connect to Netlify/Vercel
 3. Set build command: `npm run build`
 4. Set publish directory: `frontend-dist`
-5. Set environment variable: `VITE_API_URL=http://YOUR_VPS_IP/api`
+5. Set environment variable: `VITE_API_URL=https://www.ultrasecurefrat.com/api`
 
 ## Step 8: Setup Supervisor (for Laravel Queue)
 

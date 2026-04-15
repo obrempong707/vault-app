@@ -93,10 +93,14 @@ if [ -d "$BACKEND_PATH" ]; then
   if [ -f composer.json ]; then
     composer install --no-dev --optimize-autoloader || action_failed=1
     php artisan migrate --force || warn "Migrations failed; continuing"
+    php artisan db:seed --force || warn "Seeding failed; continuing"
     php artisan config:clear || true
     php artisan cache:clear || true
     php artisan route:clear || true
     php artisan view:clear || true
+    php artisan config:cache || warn "Config cache failed"
+    php artisan route:cache || warn "Route cache failed"
+    php artisan view:cache || warn "View cache failed"
   fi
 fi
 

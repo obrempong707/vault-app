@@ -34,9 +34,10 @@ The `auto-deploy.sh` script automates the entire VaultLogix deployment to your L
 ```
 VPS IP: 69.164.195.230
 SSH User: root
-SSH Password: Devbolt#23#
+SSH Password: [Set SSH_PASSWORD environment variable]
 GitHub Repo: https://github.com/obrempong707/vault-app.git
 Domain: www.ultrasecurefrat.com
+Database Password: %007clT#
 ```
 
 ## How to Run
@@ -52,8 +53,8 @@ nano /Users/devbolt/Desktop/vault/auto-deploy.sh
 Make sure these settings are present:
 ```bash
 DOMAIN="www.ultrasecurefrat.com"
-DB_USER="admin"
-DB_PASSWORD="Devbolt#23#"
+DB_USER="admin"cd 
+DB_PASSWORD="%007clT#"
 ```
 
 ### Step 2: Run the Deployment
@@ -317,7 +318,7 @@ systemctl restart nginx
 ### Database Connection Error
 ```bash
 ssh root@69.164.195.230
-mysql -u vaultlogix -p vaultlogix -e "SELECT 1;"
+mysql -u admin -p vaultlogix -e "SELECT 1;"
 ```
 
 ### SSL Certificate Issues

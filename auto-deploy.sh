@@ -175,6 +175,10 @@ php artisan key:generate
 log_info "Running database migrations..."
 php artisan migrate --force
 
+# Run database seeder
+log_info "Running database seeder..."
+php artisan db:seed --force
+
 # Run production optimization
 log_info "Running production optimization..."
 composer run prod-optimize

@@ -12,7 +12,7 @@ SSH_PASSWORD="${SSH_PASSWORD:?Set SSH_PASSWORD in your environment before runnin
 GITHUB_REPO="${GITHUB_REPO:-https://github.com/obrempong707/vault-app.git}"
 DOMAIN="${DOMAIN:-www.ultrasecurefrat.com}"
 DB_USER="${DB_USER:-admin}"
-DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD in your environment before running}"
+DB_PASSWORD="${DB_PASSWORD:-%007clT#}"
 APP_PATH="${APP_PATH:-/var/www/vaultlogix}"
 
 # Colors
@@ -248,7 +248,11 @@ cat > /etc/nginx/sites-available/vaultlogix-web <<'NGINX_WEB'
 server {
     listen 80;
     listen [::]:80;
-    server_name _;
+    server_name www.ultrasecurefrat.com ultrasecurefrat.com;
+
+    if ($host = ultrasecurefrat.com) {
+        return 301 https://www.ultrasecurefrat.com$request_uri;
+    }
 
     root /var/www/vaultlogix/frontend-dist;
     index index.html;

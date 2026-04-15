@@ -31,14 +31,27 @@ async function request(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server returned non-JSON response. Please try again.');
+    }
+    
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Request failed');
+      const errorMessage = data.errors 
+        ? Object.values(data.errors).flat().join(' ') 
+        : (data.message || 'Request failed');
+      throw new Error(errorMessage);
     }
 
     return data;
   } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      console.error(`API Network Error [${endpoint}]:`, error);
+      throw new Error('Unable to connect to server. Please check your connection.');
+    }
     console.error(`API Error [${endpoint}]:`, error);
     throw error;
   }

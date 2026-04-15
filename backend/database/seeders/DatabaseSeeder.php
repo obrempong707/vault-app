@@ -150,117 +150,129 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Get user IDs for assignment
-        $clientUser = User::where('email', 'client@vaultlogix.com')->first();
-        $adminUser = User::where('email', 'admin@vaultlogix.com')->first();
+        $clientUser = $clientEmail ? User::where('email', $clientEmail)->first() : null;
+        $adminUser = $adminEmail ? User::where('email', $adminEmail)->first() : null;
 
         // Seed Vault Assets
-        VaultAsset::updateOrCreate(
-            ['customer_id' => 'CUST-001', 'asset_type' => 'Gold Bars'],
-            [
-            'user_id' => $clientUser->id,
-            'customer_id' => 'CUST-001',
-            'customer_name' => 'Goldstein Holdings Ltd',
-            'asset_type' => 'Gold Bars',
-            'weight' => 15.5,
-            'unit' => 'kg',
-            'purity' => '99.99%',
-            'value' => 1050000,
-            'deposit_date' => '2024-01-15',
-            'vault_location' => 'Zurich Vault A-12',
-            'insurance_status' => 'Fully Insured',
-            'status' => 'stored',
-        ]
-        );
+        if ($clientUser) {
+            VaultAsset::updateOrCreate(
+                ['customer_id' => 'CUST-001', 'asset_type' => 'Gold Bars'],
+                [
+                    'user_id' => $clientUser->id,
+                    'customer_id' => 'CUST-001',
+                    'customer_name' => 'Goldstein Holdings Ltd',
+                    'asset_type' => 'Gold Bars',
+                    'weight' => 15.5,
+                    'unit' => 'kg',
+                    'purity' => '99.99%',
+                    'value' => 1050000,
+                    'deposit_date' => '2024-01-15',
+                    'vault_location' => 'Zurich Vault A-12',
+                    'insurance_status' => 'Fully Insured',
+                    'status' => 'stored',
+                ]
+            );
+        }
 
-        VaultAsset::updateOrCreate(
-            ['customer_id' => 'CUST-002', 'asset_type' => 'Diamonds'],
-            [
-            'user_id' => $adminUser->id,
-            'customer_id' => 'CUST-002',
-            'customer_name' => 'Crown Jewelers International',
-            'asset_type' => 'Diamonds',
-            'weight' => 850,
-            'unit' => 'carats',
-            'purity' => 'VVS1-VVS2',
-            'value' => 5950000,
-            'deposit_date' => '2024-02-01',
-            'vault_location' => 'London Vault B-05',
-            'insurance_status' => 'Fully Insured',
-            'status' => 'stored',
-        ]
-        );
+        if ($adminUser) {
+            VaultAsset::updateOrCreate(
+                ['customer_id' => 'CUST-002', 'asset_type' => 'Diamonds'],
+                [
+                    'user_id' => $adminUser->id,
+                    'customer_id' => 'CUST-002',
+                    'customer_name' => 'Crown Jewelers International',
+                    'asset_type' => 'Diamonds',
+                    'weight' => 850,
+                    'unit' => 'carats',
+                    'purity' => 'VVS1-VVS2',
+                    'value' => 5950000,
+                    'deposit_date' => '2024-02-01',
+                    'vault_location' => 'London Vault B-05',
+                    'insurance_status' => 'Fully Insured',
+                    'status' => 'stored',
+                ]
+            );
+        }
 
-        VaultAsset::updateOrCreate(
-            ['customer_id' => 'CUST-003', 'asset_type' => 'Sapphires'],
-            [
-            'user_id' => $adminUser->id,
-            'customer_id' => 'CUST-003',
-            'customer_name' => 'Pacific Gem Traders',
-            'asset_type' => 'Sapphires',
-            'weight' => 420,
-            'unit' => 'carats',
-            'purity' => 'AAA Grade',
-            'value' => 630000,
-            'deposit_date' => '2024-02-20',
-            'vault_location' => 'Singapore Vault C-08',
-            'insurance_status' => 'Fully Insured',
-            'status' => 'stored',
-        ]
-        );
+        if ($adminUser) {
+            VaultAsset::updateOrCreate(
+                ['customer_id' => 'CUST-003', 'asset_type' => 'Sapphires'],
+                [
+                    'user_id' => $adminUser->id,
+                    'customer_id' => 'CUST-003',
+                    'customer_name' => 'Pacific Gem Traders',
+                    'asset_type' => 'Sapphires',
+                    'weight' => 420,
+                    'unit' => 'carats',
+                    'purity' => 'AAA Grade',
+                    'value' => 630000,
+                    'deposit_date' => '2024-02-20',
+                    'vault_location' => 'Singapore Vault C-08',
+                    'insurance_status' => 'Fully Insured',
+                    'status' => 'stored',
+                ]
+            );
+        }
 
-        VaultAsset::updateOrCreate(
-            ['customer_id' => 'CUST-001', 'asset_type' => 'Platinum'],
-            [
-            'user_id' => $clientUser->id,
-            'customer_id' => 'CUST-001',
-            'customer_name' => 'Goldstein Holdings Ltd',
-            'asset_type' => 'Platinum',
-            'weight' => 8.2,
-            'unit' => 'kg',
-            'purity' => '99.95%',
-            'value' => 328000,
-            'deposit_date' => '2024-03-01',
-            'vault_location' => 'Zurich Vault A-12',
-            'insurance_status' => 'Fully Insured',
-            'status' => 'stored',
-        ]
-        );
+        if ($clientUser) {
+            VaultAsset::updateOrCreate(
+                ['customer_id' => 'CUST-001', 'asset_type' => 'Platinum'],
+                [
+                    'user_id' => $clientUser->id,
+                    'customer_id' => 'CUST-001',
+                    'customer_name' => 'Goldstein Holdings Ltd',
+                    'asset_type' => 'Platinum',
+                    'weight' => 8.2,
+                    'unit' => 'kg',
+                    'purity' => '99.95%',
+                    'value' => 328000,
+                    'deposit_date' => '2024-03-01',
+                    'vault_location' => 'Zurich Vault A-12',
+                    'insurance_status' => 'Fully Insured',
+                    'status' => 'stored',
+                ]
+            );
+        }
 
-        VaultAsset::updateOrCreate(
-            ['customer_id' => 'CUST-004', 'asset_type' => 'Emeralds'],
-            [
-            'user_id' => $adminUser->id,
-            'customer_id' => 'CUST-004',
-            'customer_name' => 'Royal Indian Jewels',
-            'asset_type' => 'Emeralds',
-            'weight' => 580,
-            'unit' => 'carats',
-            'purity' => 'AAA Grade',
-            'value' => 1740000,
-            'deposit_date' => '2024-03-10',
-            'vault_location' => 'Dubai Vault D-03',
-            'insurance_status' => 'Fully Insured',
-            'status' => 'pending_shipment',
-        ]
-        );
+        if ($adminUser) {
+            VaultAsset::updateOrCreate(
+                ['customer_id' => 'CUST-004', 'asset_type' => 'Emeralds'],
+                [
+                    'user_id' => $adminUser->id,
+                    'customer_id' => 'CUST-004',
+                    'customer_name' => 'Royal Indian Jewels',
+                    'asset_type' => 'Emeralds',
+                    'weight' => 580,
+                    'unit' => 'carats',
+                    'purity' => 'AAA Grade',
+                    'value' => 1740000,
+                    'deposit_date' => '2024-03-10',
+                    'vault_location' => 'Dubai Vault D-03',
+                    'insurance_status' => 'Fully Insured',
+                    'status' => 'pending_shipment',
+                ]
+            );
+        }
 
-        VaultAsset::updateOrCreate(
-            ['customer_id' => 'CUST-005', 'asset_type' => 'Gold Coins'],
-            [
-            'user_id' => $adminUser->id,
-            'customer_id' => 'CUST-005',
-            'customer_name' => 'Manhattan Precious Metals',
-            'asset_type' => 'Gold Coins',
-            'weight' => 22.5,
-            'unit' => 'kg',
-            'purity' => '99.99%',
-            'value' => 1530000,
-            'deposit_date' => '2023-12-05',
-            'vault_location' => 'New York Vault E-01',
-            'insurance_status' => 'Fully Insured',
-            'status' => 'stored',
-        ]
-        );
+        if ($adminUser) {
+            VaultAsset::updateOrCreate(
+                ['customer_id' => 'CUST-005', 'asset_type' => 'Gold Coins'],
+                [
+                    'user_id' => $adminUser->id,
+                    'customer_id' => 'CUST-005',
+                    'customer_name' => 'Manhattan Precious Metals',
+                    'asset_type' => 'Gold Coins',
+                    'weight' => 22.5,
+                    'unit' => 'kg',
+                    'purity' => '99.99%',
+                    'value' => 1530000,
+                    'deposit_date' => '2023-12-05',
+                    'vault_location' => 'New York Vault E-01',
+                    'insurance_status' => 'Fully Insured',
+                    'status' => 'stored',
+                ]
+            );
+        }
 
     }
 }
