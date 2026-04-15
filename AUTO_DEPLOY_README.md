@@ -36,14 +36,14 @@ VPS IP: 69.164.195.230
 SSH User: root
 SSH Password: Devbolt#23#
 GitHub Repo: https://github.com/obrempong707/vault-app.git
-Domain: yourdomain.com (CHANGE THIS!)
+Domain: www.ultrasecurefrat.com
 ```
 
 ## How to Run
 
-### Step 1: Review IP-Only Settings
+### Step 1: Review Settings
 
-Before running, confirm the script is using the VPS IP and skipping SSL for now:
+Before running, confirm the script is using your production domain and HTTPS settings:
 
 ```bash
 nano /Users/devbolt/Desktop/vault/auto-deploy.sh
@@ -51,7 +51,7 @@ nano /Users/devbolt/Desktop/vault/auto-deploy.sh
 
 Make sure these settings are present:
 ```bash
-DOMAIN="$VPS_IP"  # Use IP for now; update to your domain later
+DOMAIN="www.ultrasecurefrat.com"
 DB_USER="admin"
 DB_PASSWORD="Devbolt#23#"
 ```
@@ -96,7 +96,7 @@ The script will:
 - Deploy to web root
 
 ### Phase 5: Web Server Setup (2 minutes)
-- Configure Nginx for API and web over HTTP
+- Configure Nginx for API and web over HTTPS
 - Enable security headers
 
 ### Phase 6: Services (2-3 minutes)
@@ -190,14 +190,13 @@ The webhook only runs the update script when the push is for the configured bran
 
 ### 1. Update DNS Records
 
-Use the VPS IP now: `http://69.164.195.230`
+Use the production domain now: `https://www.ultrasecurefrat.com`
 
 Point your future domain to the VPS IP later when ready.
 
 ```
-A Record: yourdomain.com → 69.164.195.230
-A Record: api.yourdomain.com → 69.164.195.230
-A Record: www.yourdomain.com → 69.164.195.230
+A Record: ultrasecurefrat.com → 69.164.195.230
+A Record: www.ultrasecurefrat.com → 69.164.195.230
 ```
 
 Wait 5-10 minutes for DNS propagation.
@@ -214,14 +213,14 @@ Edit API configuration:
 nano /etc/nginx/sites-available/vaultlogix-api
 ```
 
-Replace all instances of `yourdomain.com` with your actual domain.
+Replace any legacy placeholder domains with `www.ultrasecurefrat.com`.
 
 Edit web configuration:
 ```bash
 nano /etc/nginx/sites-available/vaultlogix-web
 ```
 
-Replace all instances of `yourdomain.com` with your actual domain.
+Replace all instances of `yourdomain.com` with `www.ultrasecurefrat.com`.
 
 Restart Nginx:
 ```bash
@@ -232,8 +231,7 @@ systemctl restart nginx
 
 SSH into your VPS and run:
 ```bash
-certbot certonly --nginx -d yourdomain.com -d www.yourdomain.com
-certbot certonly --nginx -d api.yourdomain.com
+certbot certonly --nginx -d ultrasecurefrat.com -d www.ultrasecurefrat.com
 ```
 
 Follow the prompts to complete SSL setup.
@@ -242,7 +240,7 @@ Follow the prompts to complete SSL setup.
 
 Test the backend API:
 ```bash
-curl https://api.yourdomain.com/api/login -X POST \
+curl https://www.ultrasecurefrat.com/api/login -X POST \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
 ```
@@ -257,7 +255,7 @@ Expected response:
 
 Open frontend in browser:
 ```
-https://yourdomain.com
+https://www.ultrasecurefrat.com
 ```
 
 Should load your React application.
@@ -390,7 +388,7 @@ tar -czf vaultlogix-backup.tar.gz /var/www/vaultlogix
 
 ## Security Checklist
 
-- ✅ HTTPS/SSL enabled
+- ✅ HTTPS/SSL enabled for `www.ultrasecurefrat.com`
 - ✅ Security headers configured
 - ✅ Rate limiting enabled
 - ✅ Database user with limited privileges

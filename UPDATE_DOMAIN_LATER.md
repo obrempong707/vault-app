@@ -1,6 +1,6 @@
 # Update Domain After Deployment
 
-The deployment script is configured to use the VPS IP (`69.164.195.230`) as a temporary domain. Once you have your actual domain, follow these steps to update it.
+The deployment script is now configured for the production domain `www.ultrasecurefrat.com`. Use this guide only if you need to adjust the live DNS or SSL setup.
 
 ## Step 1: SSH into VPS
 
@@ -15,8 +15,8 @@ ssh root@69.164.195.230
 nano /etc/nginx/sites-available/vaultlogix-api
 ```
 
-Replace all instances of `69.164.195.230` with your actual domain:
-- Change `server_name 69.164.195.230;` to `server_name api.yourdomain.com;`
+Replace any legacy IP-based values with your actual production domain:
+- Change `server_name 69.164.195.230;` to `server_name www.ultrasecurefrat.com;`
 - Change SSL certificate paths to match your domain
 
 ### Update Web Configuration
@@ -24,8 +24,8 @@ Replace all instances of `69.164.195.230` with your actual domain:
 nano /etc/nginx/sites-available/vaultlogix-web
 ```
 
-Replace all instances of `69.164.195.230` with your actual domain:
-- Change `server_name 69.164.195.230;` to `server_name yourdomain.com www.yourdomain.com;`
+Replace any legacy IP-based values with your actual production domain:
+- Change `server_name 69.164.195.230;` to `server_name www.ultrasecurefrat.com;`
 - Change SSL certificate paths to match your domain
 
 ## Step 3: Update Backend .env
@@ -36,7 +36,7 @@ nano /var/www/vaultlogix/backend/.env
 
 Update the `APP_URL` variable:
 ```
-APP_URL=https://yourdomain.com
+APP_URL=https://www.ultrasecurefrat.com
 ```
 
 ## Step 4: Update Frontend .env
@@ -47,7 +47,7 @@ nano /var/www/vaultlogix/frontend/.env
 
 Update the API URL:
 ```
-VITE_API_URL=https://api.yourdomain.com/api
+VITE_API_URL=https://www.ultrasecurefrat.com/api
 ```
 
 Rebuild frontend:
@@ -61,10 +61,7 @@ cp -r dist/* /var/www/vaultlogix-web/
 
 ```bash
 # For your main domain
-certbot certonly --nginx -d yourdomain.com -d www.yourdomain.com
-
-# For API subdomain
-certbot certonly --nginx -d api.yourdomain.com
+certbot certonly --nginx -d ultrasecurefrat.com -d www.ultrasecurefrat.com
 ```
 
 ## Step 6: Update Nginx SSL Paths
@@ -73,14 +70,14 @@ Edit both Nginx configs and update SSL certificate paths:
 
 ### In vaultlogix-api:
 ```nginx
-ssl_certificate /etc/letsencrypt/live/api.yourdomain.com/fullchain.pem;
-ssl_certificate_key /etc/letsencrypt/live/api.yourdomain.com/privkey.pem;
+ssl_certificate /etc/letsencrypt/live/www.ultrasecurefrat.com/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/www.ultrasecurefrat.com/privkey.pem;
 ```
 
 ### In vaultlogix-web:
 ```nginx
-ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+ssl_certificate /etc/letsencrypt/live/www.ultrasecurefrat.com/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/www.ultrasecurefrat.com/privkey.pem;
 ```
 
 ## Step 7: Restart Services
@@ -101,9 +98,8 @@ systemctl restart php8.1-fpm
 Point your domain to the VPS IP:
 
 ```
-A Record: yourdomain.com → 69.164.195.230
-A Record: www.yourdomain.com → 69.164.195.230
-A Record: api.yourdomain.com → 69.164.195.230
+A Record: ultrasecurefrat.com → 69.164.195.230
+A Record: www.ultrasecurefrat.com → 69.164.195.230
 ```
 
 Wait 5-10 minutes for DNS propagation.
@@ -112,14 +108,14 @@ Wait 5-10 minutes for DNS propagation.
 
 Test the API:
 ```bash
-curl https://api.yourdomain.com/api/login -X POST \
+curl https://www.ultrasecurefrat.com/api/login -X POST \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password123"}'
 ```
 
 Open frontend in browser:
 ```
-https://yourdomain.com
+https://www.ultrasecurefrat.com
 ```
 
 ## Quick Reference Commands
@@ -144,8 +140,7 @@ nano /var/www/vaultlogix/frontend/.env
 cd /var/www/vaultlogix/frontend && npm run build && cp -r dist/* /var/www/vaultlogix-web/
 
 # Setup SSL
-certbot certonly --nginx -d yourdomain.com -d www.yourdomain.com
-certbot certonly --nginx -d api.yourdomain.com
+certbot certonly --nginx -d ultrasecurefrat.com -d www.ultrasecurefrat.com
 
 # Test and restart
 nginx -t && systemctl restart nginx
@@ -153,14 +148,12 @@ nginx -t && systemctl restart nginx
 
 ## Current Setup (Using IP)
 
-- **API URL:** http://69.164.195.230/api
-- **Web URL:** http://69.164.195.230
+- **Web URL:** https://www.ultrasecurefrat.com
 - **SSH:** ssh root@69.164.195.230
 
 ## After Adding Domain
 
-- **API URL:** https://api.yourdomain.com/api
-- **Web URL:** https://yourdomain.com
+- **Web URL:** https://www.ultrasecurefrat.com
 - **SSH:** ssh root@69.164.195.230 (same)
 
 ---

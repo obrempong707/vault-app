@@ -10,7 +10,7 @@ const defaultUsers = [
   {
     id: 'USR-001',
     name: 'Admin Sterling',
-    email: 'admin@vaultlogix.com',
+    email: 'admin@ultrasecurefrat.com',
     role: 'admin',
     isAdmin: true,
     customerId: null,
@@ -19,7 +19,7 @@ const defaultUsers = [
   {
     id: 'USR-002',
     name: 'Client Lawson',
-    email: 'client@vaultlogix.com',
+    email: 'client@ultrasecurefrat.com',
     role: 'client',
     isAdmin: false,
     customerId: 'CUST-001',
@@ -43,11 +43,11 @@ const normalizeUserRecord = (user) => {
     return user;
   }
 
-  if (user.email === 'client@vaultlogix.com' && user.name === 'Client User') {
+  if (user.email === 'client@ultrasecurefrat.com' && user.name === 'Client User') {
     return { ...user, name: 'Client Lawson' };
   }
 
-  if (user.email === 'admin@vaultlogix.com' && user.name === 'Admin User') {
+  if (user.email === 'admin@ultrasecurefrat.com' && user.name === 'Admin User') {
     return { ...user, name: 'Admin Sterling' };
   }
 
@@ -133,14 +133,14 @@ export const AuthProvider = ({ children }) => {
 
   const loginAsUser = () => {
     return login(
-      getDemoCredential('VITE_VAULTLOGIX_CLIENT_EMAIL', 'client@vaultlogix.com'),
+      getDemoCredential('VITE_VAULTLOGIX_CLIENT_EMAIL', 'client@ultrasecurefrat.com'),
       getDemoCredential('VITE_VAULTLOGIX_CLIENT_PASSWORD', ''),
     );
   };
 
   const loginAsAdmin = () => {
     return login(
-      getDemoCredential('VITE_VAULTLOGIX_ADMIN_EMAIL', 'admin@vaultlogix.com'),
+      getDemoCredential('VITE_VAULTLOGIX_ADMIN_EMAIL', 'admin@ultrasecurefrat.com'),
       getDemoCredential('VITE_VAULTLOGIX_ADMIN_PASSWORD', ''),
     );
   };

@@ -21,7 +21,7 @@ return [
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
-        env('PRODUCTION_FRONTEND_URL', 'https://vaultlogix.com'),
+        env('PRODUCTION_FRONTEND_URL', 'https://www.ultrasecurefrat.com'),
     ],
 
     'allowed_origins_patterns' => [],

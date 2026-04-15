@@ -10,7 +10,7 @@ VPS_IP="69.164.195.230"
 SSH_USER="root"
 SSH_PASSWORD="Devbolt#23#"
 GITHUB_REPO="https://github.com/obrempong707/vault-app.git"
-DOMAIN="$VPS_IP"  # Use IP for now; update to your domain later
+DOMAIN="www.ultrasecurefrat.com"
 DB_USER="admin"
 DB_PASSWORD="%007clT#"
 APP_PATH="/var/www/vaultlogix"
@@ -153,7 +153,7 @@ cp .env.example .env
 # Update .env file
 sed -i "s|APP_ENV=.*|APP_ENV=production|g" .env
 sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|g" .env
-sed -i "s|APP_URL=.*|APP_URL=http://$DOMAIN|g" .env
+sed -i "s|APP_URL=.*|APP_URL=https://$DOMAIN|g" .env
 sed -i "s|DB_CONNECTION=.*|DB_CONNECTION=mysql|g" .env
 sed -i "s|DB_HOST=.*|DB_HOST=127.0.0.1|g" .env
 sed -i "s|DB_PORT=.*|DB_PORT=3306|g" .env
@@ -197,7 +197,7 @@ npm ci
 
 # Create .env for frontend
 cat > .env <<FRONTEND_ENV
-VITE_API_URL=http://$DOMAIN/api
+VITE_API_URL=https://$DOMAIN/api
 FRONTEND_ENV
 
 # Build frontend
@@ -391,13 +391,13 @@ echo -e "${YELLOW}Important - Manual Steps Required:${NC}"
 echo ""
 echo "1. ${BLUE}Update DNS Records${NC}"
 echo "   Point your domain to VPS IP: $VPS_IP"
-echo "   Use the IP now: http://$VPS_IP"
-echo "   Add domain A records later when ready"
+echo "   Use the domain now: https://$DOMAIN"
+echo "   Ensure DNS A records point to $VPS_IP"
 echo ""
 echo "2. ${BLUE}Update Nginx Configuration${NC}"
 echo "   SSH into VPS: ssh root@$VPS_IP"
 echo "   Edit API config: nano /etc/nginx/sites-available/vaultlogix-api"
-echo "   Replace the IP with your actual domain when ready"
+echo "   Confirm the domain is set to $DOMAIN"
 echo "   Edit Web config: nano /etc/nginx/sites-available/vaultlogix-web"
 echo "   Replace the IP with your actual domain when ready"
 echo "   Restart: systemctl restart nginx"
@@ -412,8 +412,8 @@ echo "   Password: $DB_PASSWORD"
 echo "   (Save this securely!)"
 echo ""
 echo "5. ${BLUE}Verify Deployment${NC}"
-echo "   Check backend: curl http://$VPS_IP/api/login"
-echo "   Check frontend: http://$VPS_IP"
+echo "   Check backend: curl https://$DOMAIN/api/login"
+echo "   Check frontend: https://$DOMAIN"
 echo "   View logs: ssh root@$VPS_IP tail -f /var/www/vaultlogix/backend/storage/logs/laravel.log"
 echo ""
 echo -e "${GREEN}Deployment automation complete!${NC}"

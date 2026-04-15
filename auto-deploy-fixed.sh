@@ -10,7 +10,7 @@ VPS_IP="${VPS_IP:-69.164.195.230}"
 SSH_USER="${SSH_USER:-root}"
 SSH_PASSWORD="${SSH_PASSWORD:?Set SSH_PASSWORD in your environment before running}"
 GITHUB_REPO="${GITHUB_REPO:-https://github.com/obrempong707/vault-app.git}"
-DOMAIN="${DOMAIN:-$VPS_IP}"
+DOMAIN="${DOMAIN:-www.ultrasecurefrat.com}"
 DB_USER="${DB_USER:-admin}"
 DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD in your environment before running}"
 APP_PATH="${APP_PATH:-/var/www/vaultlogix}"
@@ -102,7 +102,7 @@ cp .env.example .env
 # Update .env file
 sed -i "s|APP_ENV=.*|APP_ENV=production|g" .env
 sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|g" .env
-sed -i "s|APP_URL=.*|APP_URL=http://$DOMAIN|g" .env
+sed -i "s|APP_URL=.*|APP_URL=https://$DOMAIN|g" .env
 sed -i "s|DB_CONNECTION=.*|DB_CONNECTION=mysql|g" .env
 sed -i "s|DB_HOST=.*|DB_HOST=127.0.0.1|g" .env
 sed -i "s|DB_PORT=.*|DB_PORT=3306|g" .env
@@ -207,7 +207,7 @@ cat > /etc/nginx/sites-available/vaultlogix-api <<'NGINX_API'
 server {
     listen 80;
     listen [::]:80;
-    server_name 69.164.195.230;
+    server_name $DOMAIN;
 
     root /var/www/vaultlogix/frontend-dist;
     index index.html;
@@ -323,8 +323,8 @@ log_info "  App Path: $APP_PATH"
 log_info "  Domain: $DOMAIN"
 log_info ""
 log_info "Access Your Application:"
-log_info "  API: http://$DOMAIN/api"
-log_info "  Web: http://$DOMAIN"
+log_info "  API: https://$DOMAIN/api"
+log_info "  Web: https://$DOMAIN"
 log_info ""
 log_info "SSH Access:"
 log_info "  ssh root@$VPS_IP"

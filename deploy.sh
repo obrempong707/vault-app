@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 # Check arguments
 if [ $# -lt 3 ]; then
     echo -e "${RED}Usage: ./deploy.sh <VPS_IP> <SSH_USER> <DOMAIN> [DB_USERNAME] [DB_PASSWORD]${NC}"
-    echo "Example: ./deploy.sh 192.0.2.1 root 192.0.2.1 admin %007clT#"
+    echo "Example: ./deploy.sh 192.0.2.1 root www.ultrasecurefrat.com admin %007clT#"
     exit 1
 fi
 
@@ -23,6 +23,7 @@ SSH_USER=$2
 DOMAIN=$3
 DB_USERNAME=${4:-"admin"}
 DB_PASSWORD=${5:-"%007clT#"}
+VITE_API_URL=https://$DOMAIN/api
 
 echo -e "${YELLOW}=== VaultLogix Deployment Script ===${NC}"
 echo "VPS IP: $VPS_IP"
