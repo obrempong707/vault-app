@@ -22,6 +22,7 @@ class VaultAsset extends Model
         'vault_location',
         'insurance_status',
         'status',
+        'vault_asset_id',
     ];
 
     protected $casts = [
@@ -33,5 +34,15 @@ class VaultAsset extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shipment()
+    {
+        return $this->hasOne(Shipment::class);
+    }
+
+    public function hasTracking(): bool
+    {
+        return $this->shipment()->exists();
     }
 }

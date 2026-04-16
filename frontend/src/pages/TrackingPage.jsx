@@ -184,10 +184,10 @@ const TrackingPage = () => {
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">
-                      {shipment.status === 'delivered' ? 'Delivered On' : 'Est. Delivery'}
+                      {shipment.status === 'pending' ? 'Status' : shipment.status === 'delivered' ? 'Delivered On' : 'Est. Delivery'}
                     </p>
                     <p className="font-semibold text-slate-900">
-                      {formatDate(shipment.deliveredAt || shipment.estimatedDelivery)}
+                      {shipment.status === 'pending' ? 'Preparing for shipment' : formatDate(shipment.deliveredAt || shipment.estimatedDelivery)}
                     </p>
                   </div>
                 </div>
@@ -326,7 +326,7 @@ const TrackingPage = () => {
                 <div>
                   <p className="text-sm text-slate-500">Total Weight</p>
                   <p className="font-medium text-slate-900">
-                    {shipment.contents.reduce((total, item) => total + item.weight, 0)} {shipment.contents[0]?.unit || 'kg'}
+                    {shipment.contents && shipment.contents.length > 0 ? `${shipment.contents.reduce((total, item) => total + item.weight, 0)} ${shipment.contents[0]?.unit || 'kg'}` : 'N/A'}
                   </p>
                 </div>
               </div>

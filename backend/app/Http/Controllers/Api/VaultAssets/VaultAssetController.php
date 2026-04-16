@@ -63,6 +63,11 @@ class VaultAssetController extends Controller
 
         $validated['user_id'] = $this->getUserId();
         $validated['customer_id'] = $validated['customer_id'] ?? $this->getUserId();
+        
+        // Ensure customer_name is never empty
+        if (empty($validated['customer_name'])) {
+            $validated['customer_name'] = 'Customer ' . $validated['customer_id'];
+        }
 
         $asset = $this->vaultAssetService->createAsset($validated);
 

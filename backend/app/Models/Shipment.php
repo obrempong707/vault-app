@@ -10,6 +10,7 @@ class Shipment extends Model
     use HasFactory;
 
     protected $fillable = [
+        'vault_asset_id',
         'tracking_id',
         'status',
         'origin',
@@ -26,6 +27,11 @@ class Shipment extends Model
         'delivered_at' => 'date',
         'total_value' => 'decimal:2',
     ];
+
+    public function vaultAsset()
+    {
+        return $this->belongsTo(VaultAsset::class);
+    }
 
     public function contents()
     {

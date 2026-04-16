@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ShipmentResource;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -27,7 +28,7 @@ class ShipmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shipments,
+            'data' => ShipmentResource::collection($shipments),
         ]);
     }
 
@@ -50,7 +51,7 @@ class ShipmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shipment,
+            'data' => new ShipmentResource($shipment),
         ]);
     }
 
@@ -114,7 +115,7 @@ class ShipmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shipment,
+            'data' => new ShipmentResource($shipment),
         ]);
     }
 
@@ -149,6 +150,7 @@ class ShipmentController extends Controller
                     'notes' => $stop->notes,
                 ];
             }),
+            'contents' => $shipment->contents,
         ];
 
         // If authenticated, include full details
@@ -157,7 +159,6 @@ class ShipmentController extends Controller
             $publicData['total_value'] = $shipment->total_value;
             $publicData['origin'] = $shipment->origin;
             $publicData['destination'] = $shipment->destination;
-            $publicData['contents'] = $shipment->contents;
         }
 
         return response()->json([
@@ -221,7 +222,7 @@ class ShipmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shipment,
+            'data' => new ShipmentResource($shipment),
         ], 201);
     }
 
@@ -277,7 +278,7 @@ class ShipmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shipment,
+            'data' => new ShipmentResource($shipment),
         ]);
     }
 
@@ -324,14 +325,17 @@ class ShipmentController extends Controller
             $vaultAsset = \App\Models\VaultAsset::findOrFail($validated['vault_asset_id']);
 
             // Create shipment
+            $customer = $vaultAsset->customer_name ?? $vaultAsset->customer_id ?? 'Unknown Customer';
+            
             $shipment = Shipment::create([
+                'vault_asset_id' => $vaultAsset->id,
                 'tracking_id' => $trackingId,
                 'status' => 'pending',
                 'origin' => $vaultAsset->vault_location,
                 'destination' => $validated['destination'],
                 'current_location' => $vaultAsset->vault_location,
                 'estimated_delivery' => $validated['estimated_delivery'],
-                'customer' => $vaultAsset->customer_name,
+                'customer' => $customer,
                 'total_value' => $vaultAsset->value,
             ]);
 
@@ -362,7 +366,7 @@ class ShipmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shipment,
+            'data' => new ShipmentResource($shipment),
             'message' => 'Shipment created successfully with tracking ID: ' . $trackingId,
         ], 201);
     }

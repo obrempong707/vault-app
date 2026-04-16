@@ -122,7 +122,7 @@ const VaultDetailPage = () => {
       const shipmentsResponse = await shipmentApi.getAll();
       const allShipments = shipmentsResponse.data.map(normalizeShipment);
       const customerShipments = allShipments.filter(shipment => 
-        shipment.customer === normalizedAsset.customerName
+        shipment.customer === normalizedAsset.customerId
       );
       setRelatedShipments(customerShipments);
 
@@ -166,7 +166,7 @@ const VaultDetailPage = () => {
         const shipmentsResponse = await shipmentApi.getAll();
         const allShipments = shipmentsResponse.data.map(normalizeShipment);
         const customerShipments = allShipments.filter(shipment => 
-          shipment.customer === asset.customerName
+          shipment.customer === asset.customerId
         );
         setRelatedShipments(customerShipments);
 

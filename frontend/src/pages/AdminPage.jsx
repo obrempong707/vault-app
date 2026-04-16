@@ -12,17 +12,17 @@ import { useAuth } from '../context/AuthContext';
 
 const normalizeShipment = (shipment) => ({
   id: shipment.id,
-  trackingId: shipment.tracking_id,
+  trackingId: shipment.trackingId,
   status: shipment.status,
-  currentLocation: shipment.current_location,
-  estimatedDelivery: shipment.estimated_delivery ? shipment.estimated_delivery.slice(0, 10) : '',
-  deliveredAt: shipment.delivered_at ? shipment.delivered_at.slice(0, 10) : null,
+  currentLocation: shipment.currentLocation,
+  estimatedDelivery: shipment.estimatedDelivery ? shipment.estimatedDelivery.slice(0, 10) : '',
+  deliveredAt: shipment.deliveredAt ? shipment.deliveredAt.slice(0, 10) : null,
   customer: shipment.customer,
-  totalValue: Number(shipment.total_value),
-  trackingStops: (shipment.tracking_stops || []).map((stop, index) => ({
+  totalValue: Number(shipment.totalValue || 0),
+  trackingStops: (shipment.trackingStops || []).map((stop, index) => ({
     location: stop.location,
     status: stop.status,
-    recordedAt: stop.recorded_at ? stop.recorded_at.slice(0, 16) : '',
+    recordedAt: stop.recordedAt ? stop.recordedAt.slice(0, 16) : '',
     notes: stop.notes || '',
     sequence: typeof stop.sequence === 'number' ? stop.sequence : index,
   })),
@@ -30,17 +30,19 @@ const normalizeShipment = (shipment) => ({
 
 const normalizeVaultAsset = (asset) => ({
   id: asset.id,
-  customerId: asset.customer_id,
-  customerName: asset.customer_name,
-  assetType: asset.asset_type,
+  customerId: asset.customerId,
+  customerName: asset.customerName,
+  assetType: asset.assetType,
   weight: Number(asset.weight),
   unit: asset.unit,
   purity: asset.purity,
   value: Number(asset.value),
-  depositDate: asset.deposit_date ? asset.deposit_date.slice(0, 10) : '',
-  vaultLocation: asset.vault_location,
-  insuranceStatus: asset.insurance_status,
+  depositDate: asset.depositDate || '',
+  vaultLocation: asset.vaultLocation,
+  insuranceStatus: asset.insuranceStatus,
   status: asset.status,
+  hasTracking: asset.hasTracking || false,
+  trackingId: asset.trackingId || null,
 });
 
 const AdminPage = () => {
@@ -75,6 +77,11 @@ const AdminPage = () => {
     vaultLocation: '',
     insuranceStatus: 'Full Insured',
     status: 'stored',
+  });
+  const [shipmentModal, setShipmentModal] = useState(null);
+  const [shipmentData, setShipmentData] = useState({
+    destination: '',
+    estimatedDelivery: '',
   });
 
   const statusOptions = ['pending', 'processing', 'in_transit', 'delivered'];
@@ -275,6 +282,8 @@ const AdminPage = () => {
         insuranceStatus: 'Full Insured',
         status: 'stored',
       });
+      setError('');
+      alert('Vault asset created successfully!');
     } catch (saveError) {
       setError(saveError.message || 'Failed to create vault asset.');
     } finally {
@@ -296,6 +305,60 @@ const AdminPage = () => {
       }
     } catch (deleteError) {
       setError(deleteError.message || 'Failed to delete vault asset.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePushToShipment = (asset) => {
+    setShipmentModal(asset);
+    setShipmentData({
+      destination: '',
+      estimatedDelivery: '',
+    });
+  };
+
+  const handleCreateShipment = async () => {
+    if (!shipmentData.destination.trim() || !shipmentData.estimatedDelivery) {
+      setError('Please fill in destination and estimated delivery date.');
+      return;
+    }
+
+    setIsSaving(true);
+    setError('');
+
+    try {
+      const payload = {
+        vault_asset_id: shipmentModal.id,
+        destination: shipmentData.destination.trim(),
+        estimated_delivery: shipmentData.estimatedDelivery,
+      };
+
+      const response = await shipmentApi.createFromVaultAsset(payload);
+      const normalizedShipment = normalizeShipment(response.data);
+      
+      // Update vault asset with tracking info
+      setVaultAssets((current) =>
+        current.map((asset) =>
+          asset.id === shipmentModal.id
+            ? {
+                ...asset,
+                hasTracking: true,
+                trackingId: normalizedShipment.trackingId,
+                status: 'pending_shipment',
+              }
+            : asset
+        )
+      );
+
+      // Add new shipment to list
+      setShipments((current) => [normalizedShipment, ...current]);
+
+      setShipmentModal(null);
+      setShipmentData({ destination: '', estimatedDelivery: '' });
+      alert(`Shipment created successfully! Tracking ID: ${normalizedShipment.trackingId}`);
+    } catch (shipmentError) {
+      setError(shipmentError.message || 'Failed to create shipment.');
     } finally {
       setIsSaving(false);
     }
@@ -705,6 +768,7 @@ const AdminPage = () => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Insurance</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Value</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Tracking</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Actions</th>
                     </tr>
                   </thead>
@@ -759,6 +823,16 @@ const AdminPage = () => {
                               />
                             </td>
                             <td className="px-6 py-4">
+                              {editData.hasTracking ? (
+                                <div className="flex items-center gap-2">
+                                  <Truck className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm text-green-600 font-medium">{editData.trackingId}</span>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-slate-500">No tracking</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
                               <div className="flex space-x-2">
                                 <button onClick={handleSave} disabled={isSaving} className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 disabled:opacity-50">
                                   <Save className="w-4 h-4" />
@@ -779,7 +853,22 @@ const AdminPage = () => {
                             <td className="px-6 py-4 text-slate-600">{asset.insuranceStatus}</td>
                             <td className="px-6 py-4 font-medium text-slate-900">{formatCurrency(asset.value)}</td>
                             <td className="px-6 py-4">
+                              {asset.hasTracking ? (
+                                <div className="flex items-center gap-2">
+                                  <Truck className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm text-green-600 font-medium">{asset.trackingId}</span>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-slate-500">No tracking</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
                               <div className="flex space-x-2">
+                                {!asset.hasTracking && (
+                                  <button onClick={() => handlePushToShipment(asset)} disabled={isSaving} className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 disabled:opacity-50" title="Push to Shipment">
+                                    <Truck className="w-4 h-4" />
+                                  </button>
+                                )}
                                 <button onClick={() => handleEdit(asset)} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
                                   <Edit2 className="w-4 h-4" />
                                 </button>
@@ -887,6 +976,64 @@ const AdminPage = () => {
           </div>
         )}
         </>
+        )}
+
+        {shipmentModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-slate-900">Create Shipment</h2>
+                <button onClick={() => setShipmentModal(null)} className="text-slate-500 hover:text-slate-700">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-700 mb-2">Asset: {shipmentModal.assetType}</p>
+                  <p className="text-sm text-slate-600">Customer: {shipmentModal.customerName}</p>
+                  <p className="text-sm text-slate-600">Value: {formatCurrency(shipmentModal.value)}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Destination</label>
+                  <input
+                    type="text"
+                    value={shipmentData.destination}
+                    onChange={(e) => setShipmentData({ ...shipmentData, destination: e.target.value })}
+                    placeholder="e.g., Singapore, New York"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Estimated Delivery Date</label>
+                  <input
+                    type="date"
+                    value={shipmentData.estimatedDelivery}
+                    onChange={(e) => setShipmentData({ ...shipmentData, estimatedDelivery: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={handleCreateShipment}
+                    disabled={isSaving}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
+                  >
+                    {isSaving ? 'Creating...' : 'Create Shipment'}
+                  </button>
+                  <button
+                    onClick={() => setShipmentModal(null)}
+                    className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </Card>
+          </div>
         )}
       </div>
     </div>

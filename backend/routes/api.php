@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Deployment\GitHubWebhookController;
-use App\Http\Controllers\Api\Shipments\ShipmentController;
+use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\Api\VaultAssets\VaultAssetController;
 use Illuminate\Support\Facades\Route;
 
