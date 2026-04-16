@@ -649,12 +649,15 @@ const AdminPage = () => {
                   placeholder="Value"
                   className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <input
-                  type="date"
-                  value={newVaultAsset.depositDate}
-                  onChange={(e) => setNewVaultAsset({ ...newVaultAsset, depositDate: e.target.value })}
-                  className="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="relative">
+                  <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-slate-500">Deposit Date</label>
+                  <input
+                    type="date"
+                    value={newVaultAsset.depositDate}
+                    onChange={(e) => setNewVaultAsset({ ...newVaultAsset, depositDate: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
                 <input
                   type="text"
                   value={newVaultAsset.vaultLocation}

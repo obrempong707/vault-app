@@ -49,13 +49,16 @@ class VaultAssetController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'customer_name' => 'required|string',
             'asset_type' => 'required|string',
-            'description' => 'required|string',
-            'quantity' => 'required|numeric|min:0',
+            'weight' => 'required|numeric|min:0',
             'unit' => 'required|string',
+            'purity' => 'nullable|string',
             'value' => 'required|numeric|min:0',
-            'location' => 'required|string',
-            'status' => 'required|string|in:active,inactive,archived',
+            'deposit_date' => 'required|date',
+            'vault_location' => 'required|string',
+            'insurance_status' => 'nullable|string',
+            'status' => 'required|string|in:stored,pending_shipment',
         ]);
 
         $validated['user_id'] = $this->getUserId();
@@ -71,13 +74,16 @@ class VaultAssetController extends Controller
     public function update(int $id, Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'customer_name' => 'sometimes|string',
             'asset_type' => 'sometimes|string',
-            'description' => 'sometimes|string',
-            'quantity' => 'sometimes|numeric|min:0',
+            'weight' => 'sometimes|numeric|min:0',
             'unit' => 'sometimes|string',
+            'purity' => 'sometimes|string',
             'value' => 'sometimes|numeric|min:0',
-            'location' => 'sometimes|string',
-            'status' => 'sometimes|string|in:active,inactive,archived',
+            'deposit_date' => 'sometimes|date',
+            'vault_location' => 'sometimes|string',
+            'insurance_status' => 'sometimes|string',
+            'status' => 'sometimes|string|in:stored,pending_shipment',
         ]);
 
         $asset = $this->vaultAssetService->updateAsset($id, $validated);
