@@ -302,19 +302,19 @@ const AdminPage = () => {
   };
 
   const filteredShipments = shipments.filter(s => 
-    s.trackingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.customer.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.trackingId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.customer || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAssets = vaultAssets.filter(a =>
-    a.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    a.assetType.toLowerCase().includes(searchTerm.toLowerCase())
+    (a.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (a.assetType || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = (users || []).filter((user) =>
+    (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.role || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddUser = () => {
